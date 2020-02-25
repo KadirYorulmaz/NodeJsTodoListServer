@@ -12,7 +12,7 @@ const port: string = process.env.PORT || '8080';
 
 const dbTaskHandler: TaskHandler = new TaskHandler();
 
-//The api calls here
+//Get all Tasks [GET]
 app.get('/', (req: any, res: any) => {
     let listOfTask = [] as any;
     console.log('1');
@@ -28,6 +28,12 @@ app.get('/', (req: any, res: any) => {
     })
 })
 
+//Get one task [GET]
+app.get('/:id', (req: any, res: any) => {
+
+})
+
+//Create task [POST]
 app.post('/createTask', (req: any, res: any) => {
     console.log(req.body);
     let task: Task = new Task(req.body.title, req.body.description, req.body.createdDate, req.body.categoryId);
@@ -42,9 +48,18 @@ app.post('/createTask', (req: any, res: any) => {
         }
     })
 })
-//create task post
-//edit task put
-//delete task delete
+
+//Edit task [PUT]
+app.put('editTask', (req: any, res: any) => {
+
+})
+
+//Delete task [DELETE]
+app.delete('deleteTask', (req: any, res: any) => {
+
+})
+
+
 
 app.listen(port, (err: Error) => {
     if (err) {
