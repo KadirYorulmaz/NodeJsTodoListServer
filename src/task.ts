@@ -25,39 +25,45 @@ export class Task {
 }
 
 export class TaskHandler {
-    createTask(Task: Task): Task {
-        return Task;
+    createTask(task: Task, callback: (err: Error | null, result?: Task) => void) {
+        const sqlStatement: string = 'INSERT INTO tasks(task_title, task_description, task_date, category_id) VALUES ($1, $2, $3, $4)';
+        const sqlvalues = [task.title, task.description, task.createdDate, task.categoryId]
+        pool.connect((err: any, client: any, done: any) => {
+            if (err) throw err
+            client.query(sqlStatement, sqlvalues, (err: any, res: any) => {
+              done()
+              if (err) {
+                console.log(err.stack)
+                callback(err, res);
+              } else {
+                  console.log(res);
+                callback(err, res);
+              }
+            })
+          })
     }
     editTask(task: Task): Task {
         return task;
     }
 
     showTask(callback: (err: Error | null, result?: Task) => void) {
-        // pool.query('SELECT * FROM tasks', (err: any, res: any) => {
-        //     console.log(err, res);
-        //     var tasks: any = res.rows
-        //     console.log("********", tasks);
-        //     return tasks;
-
-        // })
-        // pool.end()
         let tasks = [] as any;
-
+        let sqlStatement: string = 'SELECT * FROM tasks';
         pool.connect((err: any, client: any, done: any) => {
             if (err) throw err
-            client.query('SELECT * FROM tasks', (err: any, res: any) => {
+            client.query(sqlStatement, (err: any, res: any) => {
               done()
               if (err) {
                 console.log(err.stack)
+                callback(err, tasks);
               } else {
-                console.log(res.rows)
+                
                 tasks = res.rows;
-                return tasks;
+                console.log(tasks)
+                callback(err, tasks);
               }
             })
           })
-        //   console.log("tasks",tasks);
-        //   return tasks;
     }
 
     deleteTask(Task: Task): Task {
