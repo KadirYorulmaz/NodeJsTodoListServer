@@ -8,7 +8,7 @@ const pool = new Pool({
 pool.on('error', (err: any, client: any) => {
     console.error('Unexpected error on idle client', err) // your callback here
     process.exit(-1)
-  })
+})
 
 export class Task {
     title: string;
@@ -31,19 +31,34 @@ export class TaskHandler {
         pool.connect((err: any, client: any, done: any) => {
             if (err) throw err
             client.query(sqlStatement, sqlvalues, (err: any, res: any) => {
-              done()
-              if (err) {
-                console.log(err.stack)
-                callback(err, res);
-              } else {
-                  console.log(res);
-                callback(err, res);
-              }
+                done()
+                if (err) {
+                    console.log(err.stack)
+                    callback(err, res);
+                } else {
+                    console.log(res);
+                    callback(err, res);
+                }
             })
-          })
+        })
     }
-    editTask(task: Task): Task {
-        return task;
+
+    editTask(taskId: number, task: Task, callback: (err: Error | null, result?: Task) => void) {
+        const sqlStatement: string = 'UPDATE tasks SET task_title=($1), task_description=($2), task_date=($3), category_id=($4) WHERE task_id=($5)'
+        const sqlvalues = [task.title, task.description, task.createdDate, task.categoryId, taskId]
+        pool.connect((err: any, client: any, done: any) => {
+            if (err) throw err
+            client.query(sqlStatement, sqlvalues, (err: any, res: any) => {
+                done()
+                if (err) {
+                    console.log(err.stack)
+                    callback(err, res);
+                } else {
+                    console.log(res);
+                    callback(err, res);
+                }
+            })
+        })
     }
 
     showTask(callback: (err: Error | null, result?: Task) => void) {
@@ -52,21 +67,35 @@ export class TaskHandler {
         pool.connect((err: any, client: any, done: any) => {
             if (err) throw err
             client.query(sqlStatement, (err: any, res: any) => {
-              done()
-              if (err) {
-                console.log(err.stack)
-                callback(err, tasks);
-              } else {
-                
-                tasks = res.rows;
-                console.log(tasks)
-                callback(err, tasks);
-              }
+                done()
+                if (err) {
+                    console.log(err.stack)
+                    callback(err, tasks);
+                } else {
+
+                    tasks = res.rows;
+                    console.log(tasks)
+                    callback(err, tasks);
+                }
             })
-          })
+        })
     }
 
-    deleteTask(Task: Task): Task {
-        return Task;
+    deleteTask(taskId: number, callback: (err: Error | null, result?: Task) => void) {
+        const sqlStatement: string = 'DELETE FROM tasks WHERE task_id=($1)';
+        const sqlvalues = [taskId]
+        pool.connect((err: any, client: any, done: any) => {
+            if (err) throw err
+            client.query(sqlStatement, sqlvalues, (err: any, res: any) => {
+                done()
+                if (err) {
+                    console.log(err.stack)
+                    callback(err, res);
+                } else {
+                    console.log(res);
+                    callback(err, res);
+                }
+            })
+        })
     }
 }

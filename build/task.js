@@ -22,39 +22,82 @@ exports.Task = Task;
 var TaskHandler = /** @class */ (function () {
     function TaskHandler() {
     }
-    TaskHandler.prototype.createTask = function (Task) {
-        return Task;
-    };
-    TaskHandler.prototype.editTask = function (task) {
-        return task;
-    };
-    TaskHandler.prototype.showTask = function (callback) {
-        // pool.query('SELECT * FROM tasks', (err: any, res: any) => {
-        //     console.log(err, res);
-        //     var tasks: any = res.rows
-        //     console.log("********", tasks);
-        //     return tasks;
-        // })
-        // pool.end()
-        var tasks = [];
+    TaskHandler.prototype.createTask = function (task, callback) {
+        var sqlStatement = 'INSERT INTO tasks(task_title, task_description, task_date, category_id) VALUES ($1, $2, $3, $4)';
+        var sqlvalues = [task.title, task.description, task.createdDate, task.categoryId];
         pool.connect(function (err, client, done) {
             if (err)
                 throw err;
-            client.query('SELECT * FROM tasks', function (err, res) {
+            client.query(sqlStatement, sqlvalues, function (err, res) {
                 done();
                 if (err) {
                     console.log(err.stack);
+                    callback(err, res);
                 }
                 else {
-                    console.log(res.rows);
-                    tasks = res.rows;
+                    console.log(res);
+                    callback(err, res);
                 }
             });
         });
-        return tasks;
     };
-    TaskHandler.prototype.deleteTask = function (Task) {
-        return Task;
+    TaskHandler.prototype.editTask = function (taskId, task, callback) {
+        var sqlStatement = 'UPDATE tasks SET task_title=($1), task_description=($2), task_date=($3), category_id=($4) WHERE task_id=($5)';
+        var sqlvalues = [task.title, task.description, task.createdDate, task.categoryId, taskId];
+        pool.connect(function (err, client, done) {
+            if (err)
+                throw err;
+            client.query(sqlStatement, sqlvalues, function (err, res) {
+                done();
+                if (err) {
+                    console.log(err.stack);
+                    callback(err, res);
+                }
+                else {
+                    console.log(res);
+                    callback(err, res);
+                }
+            });
+        });
+    };
+    TaskHandler.prototype.showTask = function (callback) {
+        var tasks = [];
+        var sqlStatement = 'SELECT * FROM tasks';
+        pool.connect(function (err, client, done) {
+            if (err)
+                throw err;
+            client.query(sqlStatement, function (err, res) {
+                done();
+                if (err) {
+                    console.log(err.stack);
+                    callback(err, tasks);
+                }
+                else {
+                    tasks = res.rows;
+                    console.log(tasks);
+                    callback(err, tasks);
+                }
+            });
+        });
+    };
+    TaskHandler.prototype.deleteTask = function (taskId, callback) {
+        var sqlStatement = 'DELETE FROM tasks WHERE task_id=($1)';
+        var sqlvalues = [taskId];
+        pool.connect(function (err, client, done) {
+            if (err)
+                throw err;
+            client.query(sqlStatement, sqlvalues, function (err, res) {
+                done();
+                if (err) {
+                    console.log(err.stack);
+                    callback(err, res);
+                }
+                else {
+                    console.log(res);
+                    callback(err, res);
+                }
+            });
+        });
     };
     return TaskHandler;
 }());
