@@ -19,6 +19,11 @@ export class Category{
 
 }
 
+//showAllCategories
+//addCategory
+//editCategory
+//deleteCategory
+
 export class CategoryHandler{
 
     showAllCategories(callback: (err: Error | null, result?: Category) => void){
@@ -61,8 +66,8 @@ export class CategoryHandler{
     }
 
     editCategory(categoryId: number, category: Category, callback: (err: Error | null, result?: Category) => void){
-        const sqlStatement: string = 'UPDATE categories SET category_name=($1)';
-        const sqlvalues = [category.name]
+        const sqlStatement: string = 'UPDATE categories SET category_name=($1) WHERE category_id=($2) ';
+        const sqlvalues = [category.name, categoryId]
         pool.connect((err: any, client: any, done: any) => {
             if (err) throw err
             client.query(sqlStatement, sqlvalues, (err: any, res: any) => {
@@ -80,10 +85,10 @@ export class CategoryHandler{
 
     deleteCategory(categoryId: number, callback: (err: Error | null, result?: Category) => void){
         const sqlStatement: string = 'DELETE FROM categories WHERE category_id=($1)';
-        
+        const sqlvalues = [categoryId]
         pool.connect((err: any, client: any, done: any) => {
             if (err) throw err
-            client.query(sqlStatement, categoryId, (err: any, res: any) => {
+            client.query(sqlStatement, sqlvalues, (err: any, res: any) => {
               done()
               if (err) {
                 console.log(err.stack)

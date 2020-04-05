@@ -1,13 +1,15 @@
 import express = require('express');
 import bodyParser = require('body-parser');
+import cors = require('cors');
 
 import { Task, TaskHandler } from './task';
 
 import { ok } from 'assert';
 
-
-
 const app = express();
+
+app.use(cors());
+
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -17,9 +19,9 @@ const dbTaskHandler: TaskHandler = new TaskHandler();
 
 //Get all Tasks [GET]
 app.get('/', (req: any, res: any) => {
-    let listOfTask = [] as any;
-    console.log('1');
-    dbTaskHandler.showTask((err: Error | null, result?: any) => {
+    let listOfTask = [] as any; 
+    console.log('1'); 
+    dbTaskHandler.showTasks((err: Error | null, result?: any) => {
         if (err) {
             res.send("Sorry no value come with http code")
         }
@@ -34,6 +36,14 @@ app.get('/', (req: any, res: any) => {
 //Get one task [GET]
 app.get('/:id', (req: any, res: any) => {
     console.log(req.params.id);
+    const taskId: number = req.params.id
+    dbTaskHandler.showOneTask(taskId, (err: Error| null, result?: any) => {
+        if (err) {
+            res.send("Sorry no value come with http code")
+        }else{
+            res.send(result);
+        }
+    })
 })
 
 //Create task [POST]
@@ -138,7 +148,7 @@ categoryRouter.put('/editCategory/:id', (req: any, res: any) => {
     })
 })
 
-categoryRouter.delete('/deleteCategory', (req: any, res: any) => {
+categoryRouter.delete('/deleteCategory/:id', (req: any, res: any) => {
     console.log(req.params.id);
     const categoryId = req.params.id;
     dbCategoryHandler.deleteCategory(categoryId, (err: Error | null, result?: Category | undefined) => {

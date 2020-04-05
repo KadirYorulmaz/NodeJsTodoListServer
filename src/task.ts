@@ -24,6 +24,13 @@ export class Task {
     }
 }
 
+//createTask
+//editTask
+//showOneTask
+//showTask
+//deleteTask
+
+
 export class TaskHandler {
     createTask(task: Task, callback: (err: Error | null, result?: Task) => void) {
         const sqlStatement: string = 'INSERT INTO tasks(task_title, task_description, task_date, category_id) VALUES ($1, $2, $3, $4)';
@@ -61,9 +68,26 @@ export class TaskHandler {
         })
     }
 
-    showTask(callback: (err: Error | null, result?: Task) => void) {
+    showOneTask(taskId: number, callback: (err: Error | null, result?: Task) => void) {
+        let sqlStatement: string = 'SELECT * FROM tasks, categories WHERE tasks.category_id = categories.category_id AND task_id = ($1)';
+        const sqlValues = [taskId]
+        pool.connect((err: any, client: any, done: any) => {
+            if (err) throw err
+            client.query(sqlStatement, sqlValues, (err: any, res: any) => {
+                done()
+                if (err) {
+                    console.log(err.stack)
+                    callback(err, res);
+                } else {
+                    callback(err, res.rows);
+                }
+            })
+        })
+    }
+
+    showTasks(callback: (err: Error | null, result?: Task) => void) {
         let tasks = [] as any;
-        let sqlStatement: string = 'SELECT * FROM tasks';
+        let sqlStatement: string = 'SELECT * FROM tasks, categories WHERE tasks.category_id = categories.category_id';
         pool.connect((err: any, client: any, done: any) => {
             if (err) throw err
             client.query(sqlStatement, (err: any, res: any) => {
